@@ -10,6 +10,13 @@ module OmniAuth
         :token_url          => 'https://api.dropbox.com/oauth2/token'
       }
 
+      def authorize_params
+        super.tap do |params|
+          params[:token_access_type] = 'offline' if params[:token_access_type].nil?
+          session['omniauth.state'] = params[:state] if params[:state]
+        end
+      end
+
       uid { raw_info['uid'] }
 
       info do
@@ -41,6 +48,7 @@ module OmniAuth
       end
 
       def callback_url
+        # options[:callback_url] || full_host + callback_path
         options[:redirect_uri] || (full_host + script_name + callback_path)
       end
     end
